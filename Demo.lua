@@ -1223,7 +1223,7 @@ local AutoEnchants = Tabs.Enchants:Toggle({
             
             for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
                 if (v.Name:lower():find("pan") or v.Name:lower():find("world")) and v:IsA("Tool") then
-                    if v:GetAttribute("Enchants") == table.find(_G.Settings.Enchants.EnchantsSelcted) then
+                    if v:GetAttribute("Enchants") == table.find(_G.Settings.Enchants.EnchantsSelcted, v:GetAttribute("Enchants")) then
                     return
                     print("your alrdy")
                     else
