@@ -152,29 +152,29 @@ end
 
 --------------------------- CheckingRole ---------------------------
 
-local KeyFile = "Venuz Hub/KeySystem".."/".."VenuzKey"..".txt"
+-- local KeyFile = "Venuz Hub/KeySystem".."/".."VenuzKey"..".txt"
 
-local res = http.request({
-    Url = "https://pandadevelopment.net/v2_validation?key=".. readfile(KeyFile).."&service=venuzhub&hwid=venuzontop",
-    Method = "GET",
-    Headers = {
-        ["Content-Type"] = "application/json"
-    },
-}).Body
+-- local res = http.request({
+--     Url = "https://pandadevelopment.net/v2_validation?key=".. readfile(KeyFile).."&service=venuzhub&hwid=venuzontop",
+--     Method = "GET",
+--     Headers = {
+--         ["Content-Type"] = "application/json"
+--     },
+-- }).Body
 
-local sucess, data = pcall(function()
-    return HttpService:JSONDecode(res)
-end)
+-- local sucess, data = pcall(function()
+--     return HttpService:JSONDecode(res)
+-- end)
 
-if sucess then
-    if data["Key_Information"].Premium_Mode == true then
-        getgenv().Premium = false
-        getgenv().IsPremium = "Premium Access"
-    else
-        getgenv().Premium = true
-        getgenv().IsPremium = "Standard"
-    end
-end
+-- if sucess then
+--     if data["Key_Information"].Premium_Mode == true then
+--         getgenv().Premium = false
+--         getgenv().IsPremium = "Premium Access"
+--     else
+--         getgenv().Premium = true
+--         getgenv().IsPremium = "Standard"
+--     end
+-- end
 
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/x2Kotaro/API/refs/heads/main/test.lua"))()
 
@@ -294,17 +294,17 @@ local Window = WindUI:CreateWindow({
     Resizable = false,
 })
 
-Window:Tag({
-    Title = getgenv().IsPremium,
-    Color = Color3.fromHex("#30ff6a"),
-    Radius = 13,
-})
+-- Window:Tag({
+--     Title = getgenv().IsPremium,
+--     Color = Color3.fromHex("#30ff6a"),
+--     Radius = 13,
+-- })
 
-Window:Tag({
-    Title = "Update Latest 11/08/2025",
-    Color = Color3.fromHex("#f4fc02"),
-    Radius = 13,
-})
+-- Window:Tag({
+--     Title = "Update Latest 11/08/2025",
+--     Color = Color3.fromHex("#f4fc02"),
+--     Radius = 13,
+-- })
 
 Window:EditOpenButton({
     Title = "Venuz Hub",
@@ -355,12 +355,17 @@ local AutoSkillCheck = Tabs.Main:Toggle({
                         local skillGui = player:WaitForChild("PlayerGui"):WaitForChild("SkillCheckPromptGui")
                         local check = skillGui:FindFirstChild("Check")
 
+                        -- เช็ค Platform
+                        local platform = player:GetAttribute("platform")
+                        local isPC = (platform == "PC")
+                        local isMobile = (platform == "Mobile")
+
                         if check and check.Visible == true then
-                                local Line = check:FindFirstChild("Line")
-                                local Goal = check:FindFirstChild("Goal")
-                                if Line and Goal then
-                                    Goal.Rotation = Line.Rotation - 110
-                                end
+                            local Line = check:FindFirstChild("Line")
+                            local Goal = check:FindFirstChild("Goal")
+                            if Line and Goal then
+                                Goal.Rotation = Line.Rotation - 110
+                            end
 
                             -- ========== Generator SkillCheck ==========
                             local closestGen, closestGenDist = nil, math.huge
@@ -380,17 +385,23 @@ local AutoSkillCheck = Tabs.Main:Toggle({
                             if closestGen then
                                 for _, point in pairs(closestGen:GetDescendants()) do
                                     if point:IsA("BasePart") and point.Name:lower():find("generatorpoint") then
-                                        if UserInputService.KeyboardEnabled then
+                                        if isPC then
+                                            -- PC: ใช้ VirtualInputManager
+                                            local VirtualInputManager = game:GetService("VirtualInputManager")
                                             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
-                                            task.wait(0.05)
+                                            task.wait()
                                             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-                                        else
-                                            game:GetService("ReplicatedStorage").Remotes.Generator.SkillCheckResultEvent:FireServer(
-                                                "success",
-                                                1,
-                                                closestGen,
-                                                point
-                                            )
+                                        elseif isMobile then
+                                            -- Mobile: ใช้ Mobile UI Control
+                                            local GuiService = game:GetService("GuiService")
+                                            local actionButton = player.PlayerGui["Survivor-mob"].Controls.action
+                                            
+                                            GuiService.SelectedObject = actionButton
+                                            
+                                            local VirtualInputManager = game:GetService("VirtualInputManager")
+                                            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                                            task.wait()
+                                            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
                                         end
                                         break
                                     end
@@ -404,7 +415,7 @@ local AutoSkillCheck = Tabs.Main:Toggle({
                                     local otherRoot = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
                                     if otherRoot then
                                         local distance = (root.Position - otherRoot.Position).Magnitude
-                                        if distance < closestPlayerDist and distance < 10 then -- ระยะ 10 studs
+                                        if distance < closestPlayerDist and distance < 30 then
                                             closestPlayerDist = distance
                                             closestPlayer = otherPlayer
                                         end
@@ -413,20 +424,25 @@ local AutoSkillCheck = Tabs.Main:Toggle({
                             end
 
                             if closestPlayer and closestPlayer.Character then
-                                if UserInputService.KeyboardEnabled then
+                                if isPC then
+                                    -- PC: ใช้ VirtualInputManager
+                                    local VirtualInputManager = game:GetService("VirtualInputManager")
                                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
-                                    task.wait(0.05)
+                                    task.wait()
                                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
-                                else
-                                    game:GetService("ReplicatedStorage").Remotes.Healing.SkillCheckResultEvent:FireServer(
-                                        "success",
-                                        1,
-                                        closestPlayer.Character
-                                    )
+                                elseif isMobile then
+                                    -- Mobile: ใช้ Mobile UI Control
+                                    local GuiService = game:GetService("GuiService")
+                                    local actionButton = player.PlayerGui["Survivor-mob"].Controls.action
+                                    
+                                    GuiService.SelectedObject = actionButton
+                                    
+                                    local VirtualInputManager = game:GetService("VirtualInputManager")
+                                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                                    task.wait()
+                                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
                                 end
                             end
-                            
-                            task.wait(0.1)
                         end
                     end
                 end
