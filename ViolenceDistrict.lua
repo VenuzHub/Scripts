@@ -356,17 +356,11 @@ local AutoSkillCheck = Tabs.Main:Toggle({
                         local check = skillGui:FindFirstChild("Check")
 
                         if check and check.Visible == true then
-                            -- ซ่อน SkillCheck UI สำหรับมือถือ (ไม่ใช้ KeyboardEnabled)
-                            if not UserInputService.KeyboardEnabled then
-                                check.Visible = false
-                            else
-                                -- ปรับมุมสำหรับ PC
                                 local Line = check:FindFirstChild("Line")
                                 local Goal = check:FindFirstChild("Goal")
                                 if Line and Goal then
                                     Goal.Rotation = Line.Rotation - 110
                                 end
-                            end
 
                             -- ========== Generator SkillCheck ==========
                             local closestGen, closestGenDist = nil, math.huge
@@ -387,12 +381,10 @@ local AutoSkillCheck = Tabs.Main:Toggle({
                                 for _, point in pairs(closestGen:GetDescendants()) do
                                     if point:IsA("BasePart") and point.Name:lower():find("generatorpoint") then
                                         if UserInputService.KeyboardEnabled then
-                                            -- PC: กด Space
                                             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
                                             task.wait(0.05)
                                             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
                                         else
-                                            -- Mobile: ส่ง Event โดยตรง
                                             game:GetService("ReplicatedStorage").Remotes.Generator.SkillCheckResultEvent:FireServer(
                                                 "success",
                                                 1,
@@ -422,12 +414,10 @@ local AutoSkillCheck = Tabs.Main:Toggle({
 
                             if closestPlayer and closestPlayer.Character then
                                 if UserInputService.KeyboardEnabled then
-                                    -- PC: กด Space
                                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
                                     task.wait(0.05)
                                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
                                 else
-                                    -- Mobile: ส่ง Event โดยตรง
                                     game:GetService("ReplicatedStorage").Remotes.Healing.SkillCheckResultEvent:FireServer(
                                         "success",
                                         1,
@@ -436,7 +426,6 @@ local AutoSkillCheck = Tabs.Main:Toggle({
                                 end
                             end
                             
-                            -- รอให้ SkillCheck จบก่อนทำต่อ
                             task.wait(0.1)
                         end
                     end
